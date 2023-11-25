@@ -16,31 +16,40 @@ public class IngestedDataRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
     
-    //Add file data after enrichment
-    public void addData(IngestedData ingestedData) {
-        String sql = "INSERT INTO ingested_data (file_id,provider_first_name, provider_last_name, ssn ,provider_service_location_street, provider_service_location_city,provider_service_location_state,provider_service_location_zip,nppes_taxonomy,nppes_address) VALUES (?, ?, ?,?, ?, ?,?, ?, ?,?)";
-        jdbcTemplate.update(sql, ingestedData.getFileId(),ingestedData.getProviderFirstName(),ingestedData.getProviderLastName(), ingestedData.getSsn(), ingestedData.getProviderServiceLocationStreet(),ingestedData.getProviderServiceLocationCity(),ingestedData.getProviderServiceLocationState(),ingestedData.getProviderServiceLocationZip(),ingestedData.getNppesTaxonomy(),ingestedData.getNppesAddress());
-    }
-    
-    //Retriev all file data
-    public List<IngestedData> findAll() {
-        String sql = "SELECT * FROM ingested_data";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-        	IngestedData ingestedData = new IngestedData();
-        	ingestedData.setFileId(rs.getInt("file_id"));
-        	ingestedData.setProviderFirstName(rs.getString("provider_first_name"));
-        	ingestedData.setProviderLastName(rs.getString("provider_last_name"));
-        	ingestedData.setSsn(rs.getString("ssn"));
-        	ingestedData.setProviderServiceLocationStreet(rs.getString("provider_service_location_street"));
-        	ingestedData.setProviderServiceLocationCity(rs.getString("provider_service_location_city"));
-        	ingestedData.setProviderServiceLocationState(rs.getString("provider_service_location_state"));
-        	ingestedData.setProviderServiceLocationZip(rs.getString("provider_service_location_zip"));
-        	ingestedData.setNppesTaxonomy(rs.getString("nppes_taxonomy"));
-        	ingestedData.setNppesAddress(rs.getString("nppes_address"));
-            return ingestedData;
-        });
-    }
-    
+ 
+    public void createTable(String[] headers, int fileId) {
+        StringBuilder createTableQuery = new StringBuilder("CREATE TABLE IF NOT EXISTS file_data_" + fileId + " (");
 
+        for (String header : headers) {
+            // Use a generic data type for all columns (e.g., VARCHAR) since the data types are unknown
+        	header = header.trim();
+            createTableQuery.append(header).append(" VARCHAR(255), ");
+        }
+
+        // Remove the trailing comma and add a closing parenthesis
+        createTableQuery.setLength(createTableQuery.length() - 2);
+        createTableQuery.append(");");
+        System.out.println(createTableQuery.toString());
+        // Execute the SQL query to create the table
+        jdbcTemplate.execute(createTableQuery.toString());
+    }
+    
+    public void insertRecordIntoTable(String[] record, int fileId) {
+        StringBuilder insertQuery = new StringBuilder("INSERT INTO file_data_" + fileId );
+
+        
+        insertQuery.append(" VALUES (");
+
+        for (String value : record) {
+            insertQuery.append("'").append(value).append("', ");
+        }
+
+        // Remove the trailing comma and add a closing parenthesis
+        insertQuery.setLength(insertQuery.length() - 2);
+        insertQuery.append(");");
+
+        // Execute the SQL query to insert the record using JdbcTemplate
+        jdbcTemplate.execute(insertQuery.toString());
+    }
 
 }

@@ -42,7 +42,7 @@ public class IngestedDataCategory1ServiceImpl implements IngestedDataService {
     }
 
     @Override
-    public void processFile(MultipartFile file, int categoryID) {
+    public int processFile(MultipartFile file, int categoryID) {
     	IngestedFiles ingestedFile = new IngestedFiles();
     	ingestedFile.setFile_name(file.getOriginalFilename());
     	//Adding a new file to database and getting the file ID of it 
@@ -56,37 +56,18 @@ public class IngestedDataCategory1ServiceImpl implements IngestedDataService {
     	ingestedFilesRepository.addFileCategoryMapping(fileCategoryMapping);
     	
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build(); // Skip the header line
+            CSVReader csvReader = new CSVReaderBuilder(reader).build(); // Skip the header line
 
             String[] line;
-            while ((line = csvReader.readNext()) != null) {
-                // Extract CSV data and convert it to JSON format
-                String providerFirstName = line[0];
-                String providerLastName = line[1];
-                String ssn = line[2];
-                String providerStreet = line[3];
-                String providerCity = line[4];
-                String providerState = line[5];
-                String providerZip = line[6];
+            String[] headers = csvReader.readNext(); // Read the first row to get column headers
 
-                // Fetch NPPES data based on provider information
-                NPPESResponse nppesResponse = nppesApiService.retrieveTaxonomyAndAddress(providerFirstName, providerLastName);
-                
-                // Save data in the database after enrichment
-                IngestedData ingestedData = new IngestedData();
-                ingestedData.setFileId(fileId);
-                ingestedData.setProviderFirstName(providerFirstName);
-                ingestedData.setProviderLastName(providerLastName);
-                ingestedData.setSsn(ssn);
-            	ingestedData.setProviderServiceLocationStreet(providerStreet);
-            	ingestedData.setProviderServiceLocationCity(providerCity);
-            	ingestedData.setProviderServiceLocationState(providerState);
-            	ingestedData.setProviderServiceLocationZip(providerZip);
-            	ingestedData.setNppesTaxonomy(nppesResponse.getTaxonomy());
-            	ingestedData.setNppesAddress(nppesResponse.getAddress());
-                ingestedDataRepository.addData(ingestedData);
-                
+            // Create a table with column headers
+            ingestedDataRepository.createTable(headers, fileId);
+            while ((line = csvReader.readNext()) != null) {
+            	// Save data in the database
+            	ingestedDataRepository.insertRecordIntoTable(line, fileId);
                 ingestedFilesRepository.updateIngestedFiles(ingestedFile);
+                
             }
         } catch (CsvValidationException e) {
 			// TODO Auto-generated catch block
@@ -103,15 +84,14 @@ public class IngestedDataCategory1ServiceImpl implements IngestedDataService {
 			ingestedFile.setError_message("Exception in NPPES API detch");
 			ingestedFilesRepository.updateIngestedFileError(ingestedFile);
 		}
+		return fileId;
     }
 
-    @Override
-    public List<IngestedData> getAllFileData() {
-        return ingestedDataRepository.findAll();
-    }
     
     @Override
     public List<IngestedFiles> findAllFiles(){
     	return ingestedFilesRepository.findAllFiles();
     }
+    
+    
 }

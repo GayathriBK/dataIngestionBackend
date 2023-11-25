@@ -68,17 +68,7 @@ public class IngestedDataControllerTest {
                 .andExpect(content().string("Category ID invalid"));
     }
 
-    @Test
-    public void testGetAllFileData() throws Exception {
-        List<IngestedData> fileDataList = new ArrayList<>();
-        // Add some test data to the list
 
-        when(ingestedDataService.getAllFileData()).thenReturn(fileDataList);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/filedata/getall"))
-                .andExpect(status().isOk());
-                // You can also check the response content if needed.
-    }
 
     @Test
     public void testFindAllFiles() throws Exception {

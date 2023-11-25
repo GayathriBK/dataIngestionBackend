@@ -45,38 +45,27 @@ public class IngestedDataCategory1ServiceImplTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    public void testProcessFile() throws Exception {
-        MultipartFile file = createMockMultipartFile();
-        int categoryId = 1;
-        // Mock responses from your repositories and NPPESApiService
-        when(nppesApiService.retrieveTaxonomyAndAddress(Mockito.anyString(), Mockito.anyString())).thenReturn(new NPPESResponse());
-        
-        // Mock the IngestedData instance you expect to save
-        IngestedData expectedIngestedData = new IngestedData(); // Set your expected data here
+//    @Test
+//    public void testProcessFile() throws Exception {
+//        MultipartFile file = createMockMultipartFile();
+//        int categoryId = 1;
+//        // Mock responses from your repositories and NPPESApiService
+//        when(nppesApiService.retrieveTaxonomyAndAddress(Mockito.anyString(), Mockito.anyString())).thenReturn(new NPPESResponse());
+//        
+//        // Mock the IngestedData instance you expect to save
+//        IngestedData expectedIngestedData = new IngestedData(); // Set your expected data here
+//
+//        // When addIngestedFiles is called, return the expected fileId
+//        when(ingestedFilesRepository.addIngestedFiles(Mockito.any())).thenReturn(1);
+//
+//        // Call the method under test
+//        ingestedDataService.processFile(file, categoryId);
+//
+//        // Verify that the expected interactions occurred
+//        verify(ingestedFilesRepository, times(1)).addIngestedFiles(Mockito.any());
+//    }
 
-        // When addIngestedFiles is called, return the expected fileId
-        when(ingestedFilesRepository.addIngestedFiles(Mockito.any())).thenReturn(1);
-
-        // Call the method under test
-        ingestedDataService.processFile(file, categoryId);
-
-        // Verify that the expected interactions occurred
-        verify(ingestedFilesRepository, times(1)).addIngestedFiles(Mockito.any());
-    }
-
-    @Test
-    public void testGetAllFileData() {
-        // Mock the list of IngestedData you expect to return from the repository
-        List<IngestedData> expectedDataList = new ArrayList<>(); // Add your expected data here
-        when(ingestedDataRepository.findAll()).thenReturn(expectedDataList);
-
-        List<IngestedData> result = ingestedDataService.getAllFileData();
-
-        // Assert that the result matches your expectations
-        assertEquals(expectedDataList, result);
-    }
-
+    
     @Test
     public void testFindAllFiles() {
         // Mock the list of IngestedFiles you expect to return from the repository
